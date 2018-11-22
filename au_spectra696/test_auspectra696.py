@@ -48,11 +48,12 @@ class Testauspectra696(unittest.TestCase):
 
     def test_data_analysis(self):
         result = auspectra696.data_analysis(EXCEL_INPUT)
-        self.assertEqual(result, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,
+        resultJ = result['Amax']
+        self.assertEqual(resultJ, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,
                                   0.21041, 0.22364, 0.19213, 0.2101, 0.20578,
                                   0.18737, 0.20889, 0.19202])
 
-    #
+
     # def test_data_analysisNorm(self):
     #     result = auspectra696.data_analysisNorm(EXCEL_INPUT)
     #     self.assertEqual(result, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,

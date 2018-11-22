@@ -52,6 +52,8 @@ def parse_cmdline(argv):
                         default=DEFAULT_DATA_FILE_NAME)
     parser.add_argument("-n", "--normalize", help="Normalize data to max absorbance (default is true).",
                         action='store_true')
+    parser.add_argument("-t", "--table", help="Tabular summary of SampleID, Amax, lMax, size ",
+                        action='store_true')
     args = None
     try:
         args = parser.parse_args(argv)
@@ -132,7 +134,8 @@ def data_analysisNorm(data_file):
     plt.savefig('data/AuPlotNorm.png', format='png', dpi=1000)
     #plt.savefig('data/AuPlot_Correct.png', format='png', dpi=1000)
 
-    return data['Amax']
+    #return data['Amax']
+    return data
 
 def data_analysis(data_file):
     wb_data = xlrd.open_workbook(data_file)
@@ -195,7 +198,37 @@ def data_analysis(data_file):
     plt.savefig('data/AuPlot.png', format='png', dpi=1000)
     #plt.savefig('data/AuPlot_Correct.png', format='png', dpi=1000)
 
-    return data['Amax']
+    #return data['Amax']
+    return data
+
+
+
+#output data frame as nice table
+def render_mpl_table(data, col_width=4.0, row_height=0.625, font_size=14,
+                     header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
+                     bbox=[0, 0, 1, 1], header_columns=0,
+                     ax=None, **kwargs):
+    if ax is None:
+        size = (np.array(data.shape[::-1]) + np.array([0, 1])) * np.array([col_width, row_height])
+        fig, ax = plt.subplots(figsize=size)
+        ax.axis('off')
+
+    mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, **kwargs)
+
+    mpl_table.auto_set_font_size(False)
+    mpl_table.set_fontsize(font_size)
+
+    for k, cell in  six.iteritems(mpl_table._cells):
+        cell.set_edgecolor(edge_color)
+        if k[0] == 0 or k[1] < header_columns:
+            cell.set_text_props(weight='bold', color='w')
+            cell.set_facecolor(header_color)
+        else:
+            cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
+
+    plt.savefig('data/TableNov21.png', format='png', dpi=500)
+    return ax
+
 
 
 def main(argv=None):
@@ -209,12 +242,32 @@ def main(argv=None):
     try:
         # set the norm and others in this 'try' so you can pass them into data_analysis()
         if args.normalize is True:
-            print("norm is true")
-            data_analysisNorm(args.workbook)
+            if args.table is True:
+                print("table is true")
+                print("norm is true")
+                data = data_analysisNorm(args.workbook)
+                df = pd.DataFrame(data)
+                render_mpl_table(df, header_columns=0, col_width=3.0)
+            else:
+                print("table is not true")
+                print("norm is true")
+                data_analysisNorm(args.workbook)
         else:
-            print("norm not true")
-            data_analysis(args.workbook)
-        #IF JUST TABLE
+            if args.table is True:
+                print("table is true")
+                print("norm not true")
+                data = data_analysis(args.workbook)
+                df = pd.DataFrame(data)
+                render_mpl_table(df, header_columns=0, col_width=3.0)
+
+            else:
+                print("table is not true")
+                print("norm not true")
+                data_analysis(args.workbook)
+
+
+
+#IF JUST TABLE
         #IF JUST PLOT
     except IOError as e:
         warning("Problems reading file: OR INSERT ANOTHER MESSAGE", e)
