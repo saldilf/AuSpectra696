@@ -6,7 +6,6 @@ Handles the primary functions
 """
 # !/usr/bin/env python3
 
-# code ==> reformat code to comply with conventions
 
 from __future__ import print_function
 import sys
@@ -25,7 +24,10 @@ SUCCESS = 0
 INVALID_DATA = 1
 IO_ERROR = 2
 
-#DEFAULT_DATA_FILE_NAME = 'LongerTest.xlsx'
+__author__ = 'salwan'
+
+
+# DEFAULT_DATA_FILE_NAME = 'LongerTest.xlsx'
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 DEFAULT_DATA_FILE_NAME = os.path.join(DATA_DIR, "LongerTest.xlsx")
 
@@ -44,17 +46,19 @@ def parse_cmdline(argv):
         argv = sys.argv[1:]
 
     # initialize the parser object:
-    parser = ArgumentParser(description='Reads CHANGE to yours from examples help '
-                                        '')
+    parser = ArgumentParser(
+        description='Reads data from xlsx file, analyzes it, plots it, and reports key parameters. '
+                    'All program output is user-controlled'
+                    '')
     parser.add_argument("-w", "--workbook", help="The location (directory and file name) of the Excel file with "
-                                                 " The default file is {}, "
-                                                 "located in the directory".format(DEFAULT_DATA_FILE_NAME),
+                                                 " The default file is {} ".format(DEFAULT_DATA_FILE_NAME),
                         default=DEFAULT_DATA_FILE_NAME)
-    parser.add_argument("-p", "--plot", help="Plot data from Excel file (default is true).",
+    parser.add_argument("-p", "--plot", help="Plot data from Excel file (default is true). Goes to 'data' directory",
                         action='store_true')
     parser.add_argument("-n", "--normalize", help="Normalize data to max absorbance (default is true).",
                         action='store_true')
-    parser.add_argument("-t", "--table", help="Tabular summary of SampleID, Amax, lMax, size (default true)",
+    parser.add_argument("-t", "--table",
+                        help="Tabular summary of SampleID, Amax, lMax, size (default is true). Goes to 'data' directory",
                         action='store_true')
     args = None
     try:
@@ -64,17 +68,17 @@ def parse_cmdline(argv):
         warning("Problems reading file:", e)
         parser.print_help()
         return args, IO_ERROR
-    #print(vars(args))
-    return vars(args) , SUCCESS #make sample input have a list of expected args and compare
+    return vars(args), SUCCESS  # make sample input have a list of expected args and compare
 
 
 def norm(rawAbs, Amax, x):
     absoNorm = [x / Amax for x in rawAbs]  # normalizes to Amax
     maxAbsAfterNorm = max(absoNorm)
-    return absoNorm #see if can check big numbers
+    return absoNorm
 
 
 def data_analysisNorm(data_file):
+    #read data from xlsx
     wb_data = xlrd.open_workbook(data_file)
     sheet1 = wb_data.sheet_by_index(0)
     r = sheet1.nrows
@@ -104,7 +108,7 @@ def data_analysisNorm(data_file):
         Amax = max(abso)  # get max Abs to norm against it
 
         absoNorm = norm(abso, Amax, x)
-       # absoNorm = [x / Amax for x in abso]  # normalizes to Amax
+        # absoNorm = [x / Amax for x in abso]  # normalizes to Amax
 
         size = -0.02111514 * (lMax ** 2.0) + 24.6 * (lMax) - 7065.
         # J. Phys. Chem. C 2007, 111, 14664-14669
@@ -132,14 +136,13 @@ def data_analysisNorm(data_file):
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True, shadow=True)
     axes.set_xlim([400, 700])
     axes.set_ylim([0, 1.5])
-    #plt.show()
-    plt.savefig('data/AuPlotNorm.png', format='png', dpi=1000)
-    #plt.savefig('data/AuPlot_Correct.png', format='png', dpi=1000)
-
-    #return data['Amax']
+    # plt.show()
+    plt.savefig('data/dataOutput/AuPlotNorm.png', format='png', dpi=500)
     return data
 
+
 def data_analysis(data_file, plot=True):
+    #read data from xlsx
     wb_data = xlrd.open_workbook(data_file)
     sheet1 = wb_data.sheet_by_index(0)
     r = sheet1.nrows
@@ -168,8 +171,6 @@ def data_analysis(data_file, plot=True):
         lMax = abso.index(max(abso)) + 400  # find max lambda for a column
         Amax = max(abso)  # get max Abs to norm against it
 
-
-
         size = -0.02111514 * (lMax ** 2.0) + 24.6 * (lMax) - 7065.
         # J. Phys. Chem. C 2007, 111, 14664-14669
 
@@ -195,19 +196,15 @@ def data_analysis(data_file, plot=True):
             plt.ylabel('Absorbance')
             plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True, shadow=True)
             axes.set_xlim([400, 700])
-            axes.set_ylim([0 , Amax + 0.05])
+            axes.set_ylim([0, Amax + 0.05])
 
+    plt.savefig('data/dataOutput/AuPlot.png', format='png', dpi=5000)
 
-    #plt.show()
-    plt.savefig('data/AuPlot.png', format='png', dpi=1000)
-    #plt.savefig('data/AuPlot_Correct.png', format='png', dpi=1000)
-
-    #return data['Amax']
     return data
 
 
 
-#output data frame as nice table
+# output data frame as nice table
 def render_mpl_table(data, col_width=4.0, row_height=0.625, font_size=14,
                      header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
                      bbox=[0, 0, 1, 1], header_columns=0,
@@ -222,17 +219,16 @@ def render_mpl_table(data, col_width=4.0, row_height=0.625, font_size=14,
     mpl_table.auto_set_font_size(False)
     mpl_table.set_fontsize(font_size)
 
-    for k, cell in  six.iteritems(mpl_table._cells):
+    for k, cell in six.iteritems(mpl_table._cells):
         cell.set_edgecolor(edge_color)
         if k[0] == 0 or k[1] < header_columns:
             cell.set_text_props(weight='bold', color='w')
             cell.set_facecolor(header_color)
         else:
-            cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
+            cell.set_facecolor(row_colors[k[0] % len(row_colors)])
 
-    plt.savefig('data/TableNov21.png', format='png', dpi=500)
+    plt.savefig('data/dataOutput/DataTable.png', format='png', dpi=250)
     return ax
-
 
 
 def main(argv=None):
@@ -240,53 +236,42 @@ def main(argv=None):
     if ret != SUCCESS:
         return ret
 
-
-    # if args.workbook is True:
-    #     data_stats = data_analysis(args.workbook)
+    #decide program output based on user input
     if args['plot'] is True:
         if args['normalize'] is True:
             if args['table'] is True:
-                print("plot is true")
-                print("table is true")
-                print("norm is true")
-                data = data_analysisNorm(args.workbook)
+                print("You've generated a normalized plot and a table")
+                data = data_analysisNorm(args['workbook'])
                 df = pd.DataFrame(data)
                 render_mpl_table(df, header_columns=0, col_width=3.0)
             else:
-                print("plot is true")
-                print("table is not true")
-                print("norm is true")
-                data_analysisNorm(args.workbook)
+                print("You've generated a normalized plot without a table")
+                data_analysisNorm(args['workbook'])
         else:
             if args['table'] is True:
-                print("plot is true")
-                print("table is true")
-                print("norm not true")
-                data = data_analysis(args.workbook)
+                print("You've generated a non-normalized plot and a table")
+                data = data_analysis(args['workbook'])
                 df = pd.DataFrame(data)
                 render_mpl_table(df, header_columns=0, col_width=3.0)
 
             else:
-                print("plot is true")
-                print("table is not true")
-                print("norm not true")
-                data_analysis(args.workbook)
+                print("You've generated a non-normalized plot and no table")
+                data_analysis(args['workbook'])
     else:
         if args['table'] is True:
-            print("table is true")
-            print("plot not true")
-            data = data_analysis(args.workbook, plot=False)
+            print("You've generated a table and no plot")
+            data = data_analysis(args['workbook'], plot=False)
             df = pd.DataFrame(data)
             render_mpl_table(df, header_columns=0, col_width=3.0)
 
         else:
-            print("table is not true")
-            print("plot not true")
-            #data_analysis(args.workbook)
+            print("Default output: No table nor plot generated in data directory.")
+            print("Run the script with -h to see all of the available user input options.")
+            # data_analysis(args.workbook)
 
     return SUCCESS  # success
 
 
 if __name__ == "__main__":
-    status = main(sys.argv[1:])
+    status = main()
     sys.exit(status)
