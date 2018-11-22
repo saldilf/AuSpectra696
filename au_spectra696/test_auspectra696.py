@@ -60,12 +60,12 @@ class Testauspectra696(unittest.TestCase):
                                    0.18737, 0.20889, 0.19202])
 
     # test the normalized data_analysis function
-    def test_data_analysisNorm(self):
-        result = auspectra696.data_analysisNorm('data/LongerTest.xlsx')
-        resultJ = result['Amax']
-        self.assertEqual(resultJ, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,
-                                   0.21041, 0.22364, 0.19213, 0.2101, 0.20578,
-                                   0.18737, 0.20889, 0.19202])
+    # def test_data_analysisNorm(self):
+    #     result = auspectra696.data_analysisNorm('data/LongerTest.xlsx')
+    #     resultJ = result['Amax']
+    #     self.assertEqual(resultJ, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,
+    #                                0.21041, 0.22364, 0.19213, 0.2101, 0.20578,
+    #                                0.18737, 0.20889, 0.19202])
 
     # test that file entry works
 
@@ -79,3 +79,6 @@ class Test_parse_cmdline(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+
