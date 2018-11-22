@@ -50,9 +50,11 @@ def parse_cmdline(argv):
                                                  " The default file is {}, "
                                                  "located in the directory".format(DEFAULT_DATA_FILE_NAME),
                         default=DEFAULT_DATA_FILE_NAME)
+    parser.add_argument("-p", "--plot", help="Plot data from Excel file (default is true).",
+                        action='store_true')
     parser.add_argument("-n", "--normalize", help="Normalize data to max absorbance (default is true).",
                         action='store_true')
-    parser.add_argument("-t", "--table", help="Tabular summary of SampleID, Amax, lMax, size ",
+    parser.add_argument("-t", "--table", help="Tabular summary of SampleID, Amax, lMax, size (default true)",
                         action='store_true')
     args = None
     try:
@@ -63,13 +65,13 @@ def parse_cmdline(argv):
         parser.print_help()
         return args, IO_ERROR
 
-    return args, SUCCESS
+    return args, SUCCESS #make sample input have a list of expected args and compare
 
 
 def norm(rawAbs, Amax, x):
     absoNorm = [x / Amax for x in rawAbs]  # normalizes to Amax
     maxAbsAfterNorm = max(absoNorm)
-    return absoNorm
+    return absoNorm #see if can check big numbers
 
 
 def data_analysisNorm(data_file):
@@ -137,7 +139,7 @@ def data_analysisNorm(data_file):
     #return data['Amax']
     return data
 
-def data_analysis(data_file):
+def data_analysis(data_file, plot=True):
     wb_data = xlrd.open_workbook(data_file)
     sheet1 = wb_data.sheet_by_index(0)
     r = sheet1.nrows
@@ -184,16 +186,18 @@ def data_analysis(data_file):
         data['Amax'].append(Amax)
 
         # plot each column (cycle in loop)
-        plt.plot(lambdas, abso, linewidth=2, label=sheet1.cell(0, x).value)
-        axes = plt.gca()
-        box = axes.get_position()
-        axes.set_position([box.x0, box.y0, box.width * 0.983, box.height])
-        plt.xlabel('Wavelength (nm)')
-        plt.ylabel('Absorbance')
+        if plot is True:
+            plt.plot(lambdas, abso, linewidth=2, label=sheet1.cell(0, x).value)
+            axes = plt.gca()
+            box = axes.get_position()
+            axes.set_position([box.x0, box.y0, box.width * 0.983, box.height])
+            plt.xlabel('Wavelength (nm)')
+            plt.ylabel('Absorbance')
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True, shadow=True)
+            axes.set_xlim([400, 700])
+            axes.set_ylim([0 , Amax + 0.05])
 
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True, shadow=True)
-    axes.set_xlim([400, 700])
-    axes.set_ylim([0 , Amax + 0.05])
+
     #plt.show()
     plt.savefig('data/AuPlot.png', format='png', dpi=1000)
     #plt.savefig('data/AuPlot_Correct.png', format='png', dpi=1000)
@@ -241,29 +245,48 @@ def main(argv=None):
     #     data_stats = data_analysis(args.workbook)
     try:
         # set the norm and others in this 'try' so you can pass them into data_analysis()
-        if args.normalize is True:
-            if args.table is True:
-                print("table is true")
-                print("norm is true")
-                data = data_analysisNorm(args.workbook)
-                df = pd.DataFrame(data)
-                render_mpl_table(df, header_columns=0, col_width=3.0)
+
+        if args.plot is True:
+            if args.normalize is True:
+                if args.table is True:
+                    print("plot is true")
+                    print("table is true")
+                    print("norm is true")
+                    data = data_analysisNorm(args.workbook)
+                    df = pd.DataFrame(data)
+                    render_mpl_table(df, header_columns=0, col_width=3.0)
+                else:
+                    print("plot is true")
+                    print("table is not true")
+                    print("norm is true")
+                    data_analysisNorm(args.workbook)
             else:
-                print("table is not true")
-                print("norm is true")
-                data_analysisNorm(args.workbook)
+                if args.table is True:
+                    print("plot is true")
+                    print("table is true")
+                    print("norm not true")
+                    data = data_analysis(args.workbook)
+                    df = pd.DataFrame(data)
+                    render_mpl_table(df, header_columns=0, col_width=3.0)
+
+                else:
+                    print("plot is true")
+                    print("table is not true")
+                    print("norm not true")
+                    data_analysis(args.workbook)
         else:
             if args.table is True:
                 print("table is true")
-                print("norm not true")
-                data = data_analysis(args.workbook)
+                print("plot not true")
+                data = data_analysis(args.workbook, plot=False)
                 df = pd.DataFrame(data)
                 render_mpl_table(df, header_columns=0, col_width=3.0)
 
             else:
                 print("table is not true")
-                print("norm not true")
-                data_analysis(args.workbook)
+                print("plot not true")
+                #data_analysis(args.workbook)
+
 
 
 
