@@ -64,8 +64,8 @@ def parse_cmdline(argv):
         warning("Problems reading file:", e)
         parser.print_help()
         return args, IO_ERROR
-
-    return args, SUCCESS #make sample input have a list of expected args and compare
+    #print(vars(args))
+    return vars(args) , SUCCESS #make sample input have a list of expected args and compare
 
 
 def norm(rawAbs, Amax, x):
@@ -243,59 +243,46 @@ def main(argv=None):
 
     # if args.workbook is True:
     #     data_stats = data_analysis(args.workbook)
-    try:
-        # set the norm and others in this 'try' so you can pass them into data_analysis()
-
-        if args.plot is True:
-            if args.normalize is True:
-                if args.table is True:
-                    print("plot is true")
-                    print("table is true")
-                    print("norm is true")
-                    data = data_analysisNorm(args.workbook)
-                    df = pd.DataFrame(data)
-                    render_mpl_table(df, header_columns=0, col_width=3.0)
-                else:
-                    print("plot is true")
-                    print("table is not true")
-                    print("norm is true")
-                    data_analysisNorm(args.workbook)
-            else:
-                if args.table is True:
-                    print("plot is true")
-                    print("table is true")
-                    print("norm not true")
-                    data = data_analysis(args.workbook)
-                    df = pd.DataFrame(data)
-                    render_mpl_table(df, header_columns=0, col_width=3.0)
-
-                else:
-                    print("plot is true")
-                    print("table is not true")
-                    print("norm not true")
-                    data_analysis(args.workbook)
-        else:
-            if args.table is True:
+    if args['plot'] is True:
+        if args['normalize'] is True:
+            if args['table'] is True:
+                print("plot is true")
                 print("table is true")
-                print("plot not true")
-                data = data_analysis(args.workbook, plot=False)
+                print("norm is true")
+                data = data_analysisNorm(args.workbook)
+                df = pd.DataFrame(data)
+                render_mpl_table(df, header_columns=0, col_width=3.0)
+            else:
+                print("plot is true")
+                print("table is not true")
+                print("norm is true")
+                data_analysisNorm(args.workbook)
+        else:
+            if args['table'] is True:
+                print("plot is true")
+                print("table is true")
+                print("norm not true")
+                data = data_analysis(args.workbook)
                 df = pd.DataFrame(data)
                 render_mpl_table(df, header_columns=0, col_width=3.0)
 
             else:
+                print("plot is true")
                 print("table is not true")
-                print("plot not true")
-                #data_analysis(args.workbook)
+                print("norm not true")
+                data_analysis(args.workbook)
+    else:
+        if args['table'] is True:
+            print("table is true")
+            print("plot not true")
+            data = data_analysis(args.workbook, plot=False)
+            df = pd.DataFrame(data)
+            render_mpl_table(df, header_columns=0, col_width=3.0)
 
-
-
-
-#IF JUST TABLE
-        #IF JUST PLOT
-    except IOError as e:
-        warning("Problems reading file: OR INSERT ANOTHER MESSAGE", e)
-        return IO_ERROR
-
+        else:
+            print("table is not true")
+            print("plot not true")
+            #data_analysis(args.workbook)
 
     return SUCCESS  # success
 

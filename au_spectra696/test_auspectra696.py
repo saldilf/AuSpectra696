@@ -2,8 +2,9 @@
 import unittest
 import os
 import auspectra696
-from auspectra696 import main
+#from auspectra696 import main
 import xlrd
+from auspectra696 import parse_cmdline
 #from au_spectra696.auspectra696 import main
 import logging
 
@@ -47,19 +48,19 @@ class Testauspectra696(unittest.TestCase):
         self.assertEqual(resultF, 1)
 
     def test_data_analysis(self):
-        result = auspectra696.data_analysis(EXCEL_INPUT)
+        result = auspectra696.data_analysis('data/LongerTest.xlsx')
         resultJ = result['Amax']
         self.assertEqual(resultJ, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,
                                   0.21041, 0.22364, 0.19213, 0.2101, 0.20578,
                                   0.18737, 0.20889, 0.19202])
 
-
-    # def test_data_analysisNorm(self):
-    #     result = auspectra696.data_analysisNorm(EXCEL_INPUT)
-    #     self.assertEqual(result, [0.01287, 0.20669, 0.21599, 0.21233, 0.20997,
-    #                               0.21041, 0.22364, 0.19213, 0.2101, 0.20578,
-    #                               0.18737, 0.20889, 0.19202])
-
+class Test_parse_cmdline(unittest.TestCase):
+    def testOneFileInput(self):
+        test_input = ['-w', 'data/LongerTest.xlsx']
+        foo = parse_cmdline(test_input)
+        #vars(test_input)
+        #cmdlineVars = vars(parse_cmdline(test_input))
+        self.assertTrue(parse_cmdline(test_input)[0]['workbook'] == 'data/LongerTest.xlsx')
 
 # if __name__ == '__main__':
 #     unittest.main()
